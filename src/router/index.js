@@ -3,11 +3,12 @@ import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 import MainLayout from "../layouts/MainLayout.vue";
 import { useAuthStore } from "../stores/authStore";
+import SmartStock from "../views/SmartStock/SmartStock.vue";
 
 const routes = [
   {
     path: "/login",
-    component: Login
+    component: Login,
   },
   {
     path: "/",
@@ -15,16 +16,20 @@ const routes = [
     children: [
       {
         path: "",
-        component: Dashboard
-      }
+        component: Dashboard,
+      },
+      {
+        path: "smart-stock",
+        component: SmartStock,
+      },
     ],
-    meta: { requiresAuth: true }
-  }
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
 router.beforeEach((to, from, next) => {

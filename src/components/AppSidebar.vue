@@ -17,6 +17,10 @@
         Dashboard
       </el-menu-item>
 
+      <el-menu-item index="2" @click="goSmartStock">
+        Smart Stock
+      </el-menu-item>
+
       <el-menu-item index="2" @click="handleLogout">
         Logout
       </el-menu-item>
@@ -45,23 +49,25 @@ export default {
     goDashboard: function () {
       this.$router.push("/");
     },
-
+    goSmartStock: function () {
+      this.$router.push("/smart-stock");
+    },
     handleLogout: function () {
-  const auth = useAuthStore();
+      const auth = useAuthStore();
 
-  this.$confirm("ต้องการออกจากระบบหรือไม่?", "Confirm", {
-    confirmButtonText: "ตกลง",
-    cancelButtonText: "ยกเลิก",
-    type: "warning"
-  })
-  .then(function () {
-    auth.logout();
-    this.$router.push("/login");
-  }.bind(this))
-  .catch(function () {
-    // ยกเลิก
-  });
-}
+      this.$confirm("ต้องการออกจากระบบหรือไม่?", "Confirm", {
+        confirmButtonText: "ตกลง",
+        cancelButtonText: "ยกเลิก",
+        type: "warning"
+      })
+        .then(function () {
+          auth.logout();
+          this.$router.push("/login");
+        }.bind(this))
+        .catch(function () {
+          // ยกเลิก
+        });
+    }
   }
 };
 </script>
