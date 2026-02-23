@@ -1,19 +1,31 @@
 <template>
-  <el-container style="height: 100vh">
-    <el-aside width="200px">
-      <AppSidebar />
-    </el-aside>
+  <div class="container-fluid">
+    <div class="row">
 
-    <el-container>
-      <el-header>
-        SmartTools Back Office
-      </el-header>
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 bg-success p-0">
+        <AppSidebar />
+      </div>
 
-      <el-main>
-        <router-view />
-      </el-main>
-    </el-container>
-  </el-container>
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 p-0">
+
+        <!-- Header -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom px-3">
+          <span class="navbar-brand mb-0 h5">
+            SmartTools Office
+          </span>
+        </nav>
+
+        <!-- Content -->
+        <div class="p-4">
+          <router-view />
+        </div>
+
+      </div>
+
+    </div>
+  </div>
 </template>
 
 <script>
