@@ -3,7 +3,7 @@
     <div class="container">
       <div class="row justify-content-center align-items-center vh-100">
         <div class="col-md-4">
-          
+
           <div class="card shadow-lg border-0 rounded-4">
             <div class="card-body p-4">
 
@@ -21,28 +21,17 @@
 
               <div class="mb-3">
                 <label class="form-label">Username</label>
-                <input 
-                  type="text"
-                  v-model="username"
-                  class="form-control form-control-lg rounded-3"
-                  placeholder="กรอก Username"
-                />
+                <input type="text" v-model="username" class="form-control form-control-lg rounded-3"
+                  placeholder="กรอก Username" />
               </div>
 
               <div class="mb-4">
                 <label class="form-label">Password</label>
-                <input 
-                  type="password"
-                  v-model="password"
-                  class="form-control form-control-lg rounded-3"
-                  placeholder="กรอก Password"
-                />
+                <input type="password" v-model="password" class="form-control form-control-lg rounded-3"
+                  placeholder="กรอก Password" />
               </div>
 
-              <button 
-                class="btn btn-primary w-100 btn-lg rounded-3"
-                @click="handleLogin"
-              >
+              <button class="btn btn-primary w-100 btn-lg rounded-3" @click="handleLogin">
                 Login
               </button>
 
@@ -72,15 +61,40 @@ export default {
     };
   },
   methods: {
-    handleLogin: function () {
-      const auth = useAuthStore();
+    handleLogin: async function () {
 
       if (this.username !== "" && this.password !== "") {
-        auth.login("dummy-token", { name: this.username });
-        this.$router.push("/");
+
+        const response = await fetch("http://localhost:3000/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username: this.username,
+            password: this.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.status === 200) {
+
+          localStorage.setItem("token", data.token);
+
+          const auth = useAuthStore();
+          auth.login(data.token, data.user);
+
+          this.$router.push("/");
+
+        } else {
+          alert(data.message);
+        }
+
       } else {
         alert("กรุณากรอกข้อมูลให้ครบ");
       }
+
     }
   }
 };
