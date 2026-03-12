@@ -3,7 +3,9 @@ import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 import MainLayout from "../layouts/MainLayout.vue";
 import { useAuthStore } from "../stores/authStore";
-import SmartStock from "../views/SmartStock/SmartStock.vue";
+import SmartStockProduct from "../views/SmartStock/SmartStockProduct.vue";
+import SmartStockDraw from "../views/SmartStock/SmartStockDraw.vue";
+import SmartStockReport from "../views/SmartStock/SmartStockReport.vue";
 
 const routes = [
   {
@@ -19,8 +21,16 @@ const routes = [
         component: Dashboard,
       },
       {
-        path: "smart-stock",
-        component: SmartStock,
+        path: "smart-stock/product",
+        component: SmartStockProduct,
+      },
+      {
+        path: "smart-stock/draw",
+        component: SmartStockDraw,
+      },
+      {
+        path: "smart-stock/report",
+        component: SmartStockReport,
       },
     ],
     meta: { requiresAuth: true },

@@ -1,12 +1,12 @@
 <template>
   <div>
-    <h2>Smart Stock</h2>
+    <h2>Smart Stock Draw</h2>
     <p>ระบบจัดการสต็อก</p>
   </div>
 </template>
 
 <script>
 export default {
-  name: "SmartStock"
+  name: "SmartStockDraw"
 };
 </script>

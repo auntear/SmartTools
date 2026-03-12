@@ -20,35 +20,63 @@
     </div>
 
     <!-- Menu -->
-<ul class="nav nav-pills flex-column p-3">
+    <ul class="nav nav-pills flex-column p-3">
 
-  <li class="nav-item mb-2">
-    <router-link
-      to="/"
-      class="nav-link text-white menu-link"
-      exact-active-class="active-menu">
-      Dashboard
-    </router-link>
-  </li>
+      <li class="nav-item mb-2">
+        <router-link to="/" class="nav-link text-white menu-link" exact-active-class="active-menu">
+          Dashboard
+        </router-link>
+      </li>
 
-  <li class="nav-item mb-2">
-    <router-link
-      to="/smart-stock"
-      class="nav-link text-white menu-link"
-      active-class="active-menu">
-      Smart Stock
-    </router-link>
-  </li>
+      <li class="nav-item mb-2">
 
-  <li class="nav-item mt-3 border-top pt-3">
-    <button
-      class="btn btn-outline-light w-100"
-      @click="handleLogout">
-      Logout
-    </button>
-  </li>
+        <!-- Smart Stock -->
+        <div class="nav-link text-white menu-link d-flex justify-content-between align-items-center"
+          @click="toggleSmartStock">
 
-</ul>
+          <span>Smart Stock</span>
+
+          <span v-if="isSmartStockOpen === true">
+            ▼
+          </span>
+          <span v-else>
+            ▶
+          </span>
+
+        </div>
+
+        <!-- Sub Menu -->
+        <ul v-if="isSmartStockOpen === true" class="nav flex-column submenu">
+
+          <li class="nav-item">
+            <router-link to="/smart-stock/product" class="nav-link text-white submenu-link" active-class="active-menu">
+              ลงทะเบียนครุภัณฑ์
+            </router-link>
+          </li>
+
+          <li class="nav-item">
+            <router-link to="/smart-stock/draw" class="nav-link text-white submenu-link" active-class="active-menu">
+              เบิกXXXX
+            </router-link>
+          </li>
+
+          <li class="nav-item">
+            <router-link to="/smart-stock/report" class="nav-link text-white submenu-link" active-class="active-menu">
+              รายงานXXX
+            </router-link>
+          </li>
+
+        </ul>
+
+      </li>
+
+      <li class="nav-item mt-3 border-top pt-3">
+        <button class="btn btn-outline-light w-100" @click="handleLogout">
+          Logout
+        </button>
+      </li>
+
+    </ul>
 
   </div>
 </template>
@@ -57,7 +85,43 @@
 import { useAuthStore } from "../stores/authStore";
 
 export default {
+
+  data: function () {
+    return {
+      isSmartStockOpen: false
+    };
+  },
+
+  mounted: function () {
+
+    const currentPath = this.$route.path;
+
+    if (currentPath.indexOf("/smart-stock") === 0) {
+      this.isSmartStockOpen = true;
+    } else {
+      this.isSmartStockOpen = false;
+    }
+
+  },
+
+  watch: {
+
+    $route: function (to) {
+
+      const currentPath = to.path;
+
+      if (currentPath.indexOf("/smart-stock") === 0) {
+        this.isSmartStockOpen = true;
+      } else {
+        this.isSmartStockOpen = false;
+      }
+
+    }
+
+  },
+
   computed: {
+
     user: function () {
       const auth = useAuthStore();
 
@@ -69,24 +133,31 @@ export default {
     },
 
     firstLetter: function () {
+
       if (this.user != null && this.user.name != null) {
         return this.user.name.charAt(0).toUpperCase();
       } else {
         return "G";
       }
+
     }
+
   },
 
   methods: {
-    goDashboard: function () {
-      this.$router.push("/");
-    },
 
-    goSmartStock: function () {
-      this.$router.push("/smart-stock");
+    toggleSmartStock: function () {
+
+      if (this.isSmartStockOpen === true) {
+        this.isSmartStockOpen = false;
+      } else {
+        this.isSmartStockOpen = true;
+      }
+
     },
 
     handleLogout: function () {
+
       const auth = useAuthStore();
 
       if (auth.isLoggedIn === true) {
@@ -95,8 +166,11 @@ export default {
       } else {
         this.$router.push("/login");
       }
+
     }
+
   }
+
 };
 </script>
 
@@ -131,5 +205,19 @@ export default {
   aspect-ratio: 1 / 1;
   font-size: 1.5rem;
   font-weight: bold;
+}
+
+.submenu {
+  padding-left: 20px;
+}
+
+.submenu-link {
+  font-size: 0.9rem;
+  border-radius: 6px;
+  transition: 0.2s ease-in-out;
+}
+
+.submenu-link:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 </style>

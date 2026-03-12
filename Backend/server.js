@@ -44,15 +44,12 @@ app.post("/api/create-user", function (req, res) {
     if (username === null || username === undefined || username === "") {
         return res.status(400).json({ message: "กรอก Username" });
     }
-
     if (password === null || password === undefined || password === "") {
         return res.status(400).json({ message: "กรอก Password" });
     }
-
     if (fullname === null || fullname === undefined || fullname === "") {
         return res.status(400).json({ message: "กรอก Fullname" });
     }
-
     if (role === null || role === undefined || role === "") {
         return res.status(400).json({ message: "กรอก Role" });
     }
@@ -82,7 +79,6 @@ app.post("/api/create-user", function (req, res) {
                 if (err2 !== null) {
                     return res.status(500).json({ message: "Insert error" });
                 }
-
                 return res.json({
                     message: "สร้างผู้ใช้งานสำเร็จ",
                 });
@@ -113,30 +109,25 @@ app.post("/api/login", function (req, res) {
         if (err !== null) {
             return res.status(500).json({ message: "Database error" });
         }
-
         if (results.length === 0) {
             return res.status(401).json({ message: "ไม่พบผู้ใช้งาน" });
         }
-
         const user = results[0];
 
         // เช็คสถานะบัญชี
         if (user.status !== "active") {
             return res.status(403).json({ message: "บัญชีถูกระงับ" });
         }
-
         // เช็ค lock
         if (user.locked_until !== null) {
             const now = new Date();
             const lockedTime = new Date(user.locked_until);
-
             if (now < lockedTime) {
                 return res.status(403).json({ message: "บัญชีถูกล็อคชั่วคราว" });
             }
         }
 
         let isMatch = false;
-
         try {
             isMatch = bcrypt.compareSync(password, user.password);
         } catch (error) {
@@ -182,7 +173,6 @@ app.post("/api/login", function (req, res) {
                 const lockSql =
                     "UPDATE users SET login_attempt = ?, locked_until = ? WHERE id = ?";
                 db.query(lockSql, [attempts, lockTime, user.id]);
-
                 return res
                     .status(403)
                     .json({ message: "รหัสผิดเกิน 5 ครั้ง บัญชีถูกล็อค 15 นาที" });
@@ -196,6 +186,77 @@ app.post("/api/login", function (req, res) {
     });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ===========================
+// AUTHENTICATION MIDDLEWARE
+// ===========================
+
+function authenticateToken(req, res, next) {
+
+    const authHeader = req.headers["authorization"];
+
+    if (authHeader === null || authHeader === undefined) {
+        return res.status(401).json({ message: "No token provided" });
+    }
+    if (authHeader.startsWith("Bearer ") === false) {
+        return res.status(401).json({ message: "Invalid token format" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (token === null || token === undefined || token === "") {
+        return res.status(401).json({ message: "Token missing" });
+    }
+    jwt.verify(token, SECRET_KEY, function (err, decoded) {
+        if (err !== null && err !== undefined) {
+            return res.status(403).json({ message: "Token invalid or expired" });
+        }
+        req.user = decoded;
+        next();
+    });
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.get("/api/dashboard", authenticateToken, function (req, res) {
+
+    return res.json({
+        message: "Access granted",
+        user: req.user
+    });
+
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.get("/api/getDep", authenticateToken, function (req, res) {
+
+    const data = [
+        {
+            name: "A",
+            no: "1",
+            active: "Y"
+        },
+        {
+            name: "B",
+            no: "2",
+            active: "Y"
+        },
+        {
+            name: "C",
+            no: "3",
+            active: "Y"
+        }
+    ];
+
+    return res.json({
+        message: "Access granted",
+        data: data
+    });
+
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ===========================
 app.listen(PORT, function () {
     console.log("Server running on port " + PORT);
