@@ -20,13 +20,14 @@ const db = mysql.createConnection({
     password: "Cwhos@11020@",
     database: "dna",
     port: 3306,
+    charset: "utf8mb4",
 });
 
 db.connect(function (err) {
-    if (err !== null) {
-        console.log("Database connect error");
+    if (err !== null && err !== undefined) {
+        console.log(err);
     } else {
-        console.log("Database connected");
+        db.query("SET NAMES utf8mb4");
     }
 });
 
@@ -193,7 +194,6 @@ app.post("/api/login", function (req, res) {
 // ===========================
 
 function authenticateToken(req, res, next) {
-
     const authHeader = req.headers["authorization"];
 
     if (authHeader === null || authHeader === undefined) {
@@ -219,43 +219,109 @@ function authenticateToken(req, res, next) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/api/dashboard", authenticateToken, function (req, res) {
-
     return res.json({
         message: "Access granted",
-        user: req.user
+        user: req.user,
     });
-
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.get("/api/getDep", authenticateToken, function (req, res) {
-
-    const data = [
-        {
-            name: "A",
-            no: "1",
-            active: "Y"
-        },
-        {
-            name: "B",
-            no: "2",
-            active: "Y"
-        },
-        {
-            name: "C",
-            no: "3",
-            active: "Y"
+    const sql = "SELECT no,dep,active FROM sms_department";
+    db.query(sql, function (err, results) {
+        if (err !== null && err !== undefined) {
+            console.log(err);
+            return res.status(500).json({
+                message: "Database error",
+            });
+        } else {
+            const data = results;
+            return res.json({
+                message: "Access granted",
+                data: data,
+            });
         }
-    ];
-
-    return res.json({
-        message: "Access granted",
-        data: data
     });
-
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get("/api/getAsset", authenticateToken, function (req, res) {
+    const no = req.query.no;
+    if (no === null || no === undefined) {
+        return res.status(400).json({
+            message: "dep is required",
+        });
+    } else {
+        const sql = "SELECT * FROM stock_asset WHERE dep = ? ORDER BY id DESC";
+        db.query(sql, [no], function (err, results) {
+            if (err !== null && err !== undefined) {
+                console.log(err);
+                return res.status(500).json({
+                    message: "Database error",
+                });
+            } else {
+                const data = results;
+                return res.json({
+                    message: "Access granted",
+                    data: data,
+                });
+            }
+        });
+    }
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.post("/api/addAsset", authenticateToken, function (req, res) {
+    const {
+        no,
+        asset_code,
+        asset_name,
+        category,
+        brand,
+        model,
+        serial_number,
+        purchase_date,
+        price,
+        status,
+        location,
+    } = req.body;
+    const sql = `
+  INSERT INTO stock_asset
+  (dep, asset_code, asset_name, category, brand, model, serial_number, purchase_date, price, status, location)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+    db.query(
+        sql,
+        [
+            no,
+            asset_code,
+            asset_name,
+            category,
+            brand,
+            model,
+            serial_number,
+            purchase_date,
+            price,
+            status,
+            location,
+        ],
+        function (err) {
+            if (err !== null && err !== undefined) {
+                console.log(err);
+                return res.status(500).json({
+                    message: "Database error",
+                });
+            } else {
+                return res.json({
+                    message: "เพิ่มครุภัณฑ์สำเร็จ",
+                });
+            }
+        },
+    );
+});
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ===========================
 app.listen(PORT, function () {
